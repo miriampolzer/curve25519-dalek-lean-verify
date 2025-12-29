@@ -33,6 +33,7 @@ natural language specs:
     • u8x32_to_nat(b) ≡ scalar_to_nat(u) (mod L)
 -/
 
+set_option maxHeartbeats 1000000 in
 /-- **Spec and proof concerning `scalar.Scalar52.to_bytes`**:
 - No panic (always returns successfully)
 - The result byte array represents the same number as the input unpacked scalar modulo L
@@ -42,6 +43,9 @@ theorem to_bytes_spec (u : Scalar52) :
     ∃ b, to_bytes u = ok b ∧
     U8x32_as_Nat b ≡ Scalar52_as_Nat u [MOD L] ∧
     U8x32_as_Nat b < L := by
-    sorry
+    unfold to_bytes
+    progress*
+    constructor
+    simp only [*]
 
 end curve25519_dalek.backend.serial.u64.scalar.Scalar52

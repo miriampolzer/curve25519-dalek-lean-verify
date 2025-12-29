@@ -82,14 +82,30 @@ theorem recompose_decomposed_limb_split (limb : U64) (h : limb.val < 2 ^ 51) :
   simp [this]
   bv_decide
 
+#eval (BitVec.not (BitVec.ofNat 64 (2^51 - 1)))
+
 
 -- This is specific to the problem below
 theorem decompose_or_limbs (limb0 limb1 : U64) (h : limb0.val < 2 ^ 51) :
-  ((limb0.val >>> 48 ||| limb1.val <<< 4 % U64.size) % 2 ^ 8) =
+  ((limb0.val >>> 48 ||| limb1.val <<< 4) % 2 ^ 8) =
   (limb0.val >>> 48 % 2 ^ 8) +
   ((limb1.val <<< 4) % 2 ^ 8) := by
-  bvify 64 at *
-  -- The idea is to do something similar to the proof above
+  -- We must provide the bit-level implication of 'val < 2^51' to bv_decide
+  --have h0_bv : limb0.bv &&& (BitVec.not (BitVec.ofNat 64 (2^51 - 1))) = 0 := by
+  --  bvify 64 at *
+  --  bv_decide
+  have : (limb0.val >>> 48 = limb0.val >>> 48 % 2 ^ 3) := by
+    bvify 64 at *
+    bv_decide
+  rw [this] ; clear this
+  -- bvify 64 at * -- oh no stackoverflow without clear this
+  bvify 64
+  have : BitVec.ofNat 64 (↑limb1 <<< 4 % 256) =
+         (BitVec.ofNat 64 ↑limb1 <<< 4) % 256 := by
+    natify
+    simp_scalar
+    -- this is wrong, why? I'm stuck here...
+
 
   sorry
 
